@@ -6,27 +6,16 @@ import pandas as pd
 import pytest
 
 # from output import build_tag
-#from pybatfish.client.session import Session
+from pybatfish.client.session import Session
 from pybfe.client.session import GRPCSession as Session
-
-# BF_NETWORK = os.environ.get("BF_NETWORK", "arista-demo")
-# BF_SNAPSHOT = os.environ.get("BF_SNAPSHOT", "snapshot0")
-BF_INIT_SNAPSHOT = "no"
-# BF_INIT_TOPOLOGY_AGGREGATES = os.environ.get("BF_INIT_TOPOLOGY_AGGREGATES", "yes")
-
-BF_NETWORK = 'arista'
-BF_SNAPSHOT = 'snapshot0'
-#BF_SNAPSHOT_DIR = '{}/'.format(os.environ.get("BF_SNAPSHOT_DIR", "."))
-
-host = "bfedev.local.intentionet.com"
-BF_DASHBOARD = f"{host}/dashboard"
-#BF_DASHBOARD = os.environ.get("BF_DASHBOARD", f"{host}/dashboard")
 
 NETWORK_FIXTURES = ['arista']
 
-cert_path = "/users/samir/git/batfish-enterprise/proxy/intentionetCA.pem"
-os.environ["REQUESTS_CA_BUNDLE"] = cert_path
-os.environ["BFE_SSL_CERT"] = cert_path
+BF_INIT_SNAPSHOT = "yes"
+BF_NETWORK = 'arista'
+BF_SNAPSHOT = 'snapshot0'
+BF_SNAPSHOT_DIR = f"{os.getcwd()}/{BF_SNAPSHOT}"
+BF_DASHBOARD = None
 
 
 ####################
@@ -64,7 +53,7 @@ def pytest_addoption(parser):
 def bf():
 
     try:
-        bf = Session(host=host, ssl=True)
+        bf = Session.get('bfe')
         os.environ["SESSION_TYPE"] = 'bfe'
     except:
         bf = Session.get('bf')
@@ -81,17 +70,6 @@ def bf():
     if session_type == 'bfe':
         bf.get_node_roles()
 
-    # if session_type == "bfe" and BF_INIT_TOPOLOGY_AGGREGATES == "yes":
-    #     nodes = list(bf.q.nodeProperties().answer().frame()['Node'])
-    #     aggregates = {
-    #         'external': ['internet', 'isps'],
-    #         'isps': ['isp_600', 'isp_577'],
-    #         'bor': ['bor01', 'bor02'],
-    #         'bl': ['bl01', 'bl02'],
-    #         'spine': [node for node in nodes if node.startswith('spine')],
-    #         'leaf': [node for node in nodes if node.startswith('leaf')]
-    #     }
-    #     bf.put_topology_aggregates(aggregates)
     return bf
 
 @pytest.fixture

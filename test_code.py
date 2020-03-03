@@ -28,7 +28,12 @@ os.environ["REQUESTS_CA_BUNDLE"] = cert_path
 os.environ["BFE_SSL_CERT"] = cert_path
 host = "bfedev.local.intentionet.com"
 
-bf = Session(host=host, ssl=True)
+
+try:
+    bf = Session(host=host, ssl=True)
+except:
+    bf = Session.get('bf')
+
 NETWORK = 'arista'
 BASE_SNAPSHOT_DIR = '/Users/samir/git/arista-demo'
 SNAPSHOT_NAME = 'snapshot0'
@@ -43,6 +48,10 @@ def exclude_vlan_loop_interface(interface):
         return False
     else:
         return True
+
+
+l3vni = bf.q.evpnL3VniProperties().answer().frame()
+df = l3vni[l3vni.duplicated('Route_Distinguisher', keep=False)].sort_values('Route_Distinguisher')
 
 ipOwn = bf.q.ipOwners(duplicatesOnly=True).answer().frame()
 
